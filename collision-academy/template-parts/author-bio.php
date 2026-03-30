@@ -47,10 +47,11 @@ $author_url  = get_author_posts_url( $author_id );
 			<?php
 			printf(
 				/* translators: %s = author display name */
-				esc_html__( 'More articles by %s &rarr;', 'collision-academy' ),
+				esc_html__( 'More articles by %s', 'collision-academy' ),
 				esc_html( $author_name )
 			);
 			?>
+			<span aria-hidden="true"> &rarr;</span>
 		</a>
 	</div>
 

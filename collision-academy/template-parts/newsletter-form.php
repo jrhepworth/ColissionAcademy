@@ -17,6 +17,8 @@
  *
  * @package CollisionAcademy
  */
+
+$newsletter_id = wp_unique_id( 'ca-nl-' );
 ?>
 
 <div class="ca-nl-form-wrap">
@@ -43,18 +45,18 @@
 			If a bot fills this field, the server silently discards the submission.
 		-->
 		<div class="ca-honeypot" aria-hidden="true">
-			<label for="ca_website_nl"><?php esc_html_e( 'Leave this empty', 'collision-academy' ); ?></label>
-			<input type="text" id="ca_website_nl" name="ca_website" autocomplete="off" tabindex="-1">
+			<label for="<?php echo esc_attr( $newsletter_id ); ?>-website"><?php esc_html_e( 'Leave this empty', 'collision-academy' ); ?></label>
+			<input type="text" id="<?php echo esc_attr( $newsletter_id ); ?>-website" name="ca_website" autocomplete="off" tabindex="-1">
 		</div>
 
 		<!-- Name Field -->
 		<div class="ca-nl-form__field">
-			<label for="ca-nl-name" class="ca-nl-form__label">
+			<label for="<?php echo esc_attr( $newsletter_id ); ?>-name" class="ca-nl-form__label">
 				<?php esc_html_e( 'First name', 'collision-academy' ); ?>
 			</label>
 			<input
 				type="text"
-				id="ca-nl-name"
+				id="<?php echo esc_attr( $newsletter_id ); ?>-name"
 				name="ca_name"
 				class="ca-nl-form__input"
 				placeholder="<?php esc_attr_e( 'Your name', 'collision-academy' ); ?>"
@@ -66,12 +68,12 @@
 
 		<!-- Email Field -->
 		<div class="ca-nl-form__field">
-			<label for="ca-nl-email" class="ca-nl-form__label">
+			<label for="<?php echo esc_attr( $newsletter_id ); ?>-email" class="ca-nl-form__label">
 				<?php esc_html_e( 'Email address', 'collision-academy' ); ?>
 			</label>
 			<input
 				type="email"
-				id="ca-nl-email"
+				id="<?php echo esc_attr( $newsletter_id ); ?>-email"
 				name="ca_email"
 				class="ca-nl-form__input"
 				placeholder="<?php esc_attr_e( 'your@email.com', 'collision-academy' ); ?>"

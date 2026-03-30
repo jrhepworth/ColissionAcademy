@@ -26,13 +26,14 @@ get_header();
 <!-- ============================================================
      SECTION 2: FEATURED / LATEST ARTICLES
      ============================================================ -->
-<section class="ca-section ca-section--articles" aria-label="<?php esc_attr_e( 'Latest articles', 'collision-academy' ); ?>">
+<section id="articles" class="ca-section ca-section--articles" aria-label="<?php esc_attr_e( 'Latest articles', 'collision-academy' ); ?>">
 	<div class="ca-container">
 
 		<header class="ca-section-header">
 			<h2 class="ca-section-header__title"><?php esc_html_e( 'Latest Articles', 'collision-academy' ); ?></h2>
-			<a href="<?php echo esc_url( get_permalink( get_option( 'page_for_posts' ) ) ); ?>" class="ca-section-header__link">
-				<?php esc_html_e( 'View all articles &rarr;', 'collision-academy' ); ?>
+			<a href="<?php echo esc_url( collision_academy_get_articles_url() ); ?>" class="ca-section-header__link">
+				<?php esc_html_e( 'View all articles', 'collision-academy' ); ?>
+				<span aria-hidden="true"> &rarr;</span>
 			</a>
 		</header>
 

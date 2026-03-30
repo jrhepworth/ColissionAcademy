@@ -19,7 +19,7 @@ get_header();
 		<!-- Category Header -->
 		<header class="ca-archive-header">
 			<span class="ca-eyebrow"><?php esc_html_e( 'Category', 'collision-academy' ); ?></span>
-			<?php single_cat_title( '<h1 class="ca-archive-header__title">', '</h1>' ); ?>
+			<h1 class="ca-archive-header__title"><?php echo esc_html( single_cat_title( '', false ) ); ?></h1>
 			<?php
 			$cat_description = category_description();
 			if ( $cat_description ) :
@@ -32,7 +32,7 @@ get_header();
 		<nav class="ca-category-filter" aria-label="<?php esc_attr_e( 'Filter by category', 'collision-academy' ); ?>">
 			<ul class="ca-category-filter__list">
 				<li class="ca-category-filter__item">
-					<a href="<?php echo esc_url( get_permalink( get_option( 'page_for_posts' ) ) ?: home_url( '/' ) ); ?>" class="ca-category-filter__link">
+					<a href="<?php echo esc_url( collision_academy_get_articles_url() ); ?>" class="ca-category-filter__link">
 						<?php esc_html_e( 'All', 'collision-academy' ); ?>
 					</a>
 				</li>
@@ -63,7 +63,10 @@ get_header();
 		<?php else : ?>
 			<div class="ca-no-results">
 				<p><?php esc_html_e( 'No articles found in this category.', 'collision-academy' ); ?></p>
-				<a href="<?php echo esc_url( home_url( '/' ) ); ?>" class="ca-btn ca-btn--secondary"><?php esc_html_e( '&larr; Back to all articles', 'collision-academy' ); ?></a>
+				<a href="<?php echo esc_url( collision_academy_get_articles_url() ); ?>" class="ca-btn ca-btn--secondary">
+					<span aria-hidden="true">&larr;</span>
+					<?php esc_html_e( 'Back to all articles', 'collision-academy' ); ?>
+				</a>
 			</div>
 		<?php endif; ?>
 

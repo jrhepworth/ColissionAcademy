@@ -33,9 +33,30 @@ if ( ! defined( 'ABSPATH' ) ) {
 function collision_academy_meta_tags() {
 	global $post;
 
+	// Let Yoast SEO take over if it is active to avoid duplicate canonical/meta tags.
+	if ( defined( 'WPSEO_VERSION' ) ) {
+		return;
+	}
+
+	$title       = get_bloginfo( 'name' );
+	$description = get_bloginfo( 'description' );
+	$image       = collision_academy_get_default_og_image();
+	$url         = collision_academy_get_canonical_url();
+	$type        = 'website';
+
 	// --- Determine page-specific values ---
 
-	if ( is_singular() && isset( $post ) ) {
+	if ( is_front_page() ) {
+		$title = get_bloginfo( 'name' );
+
+	} elseif ( is_home() ) {
+		$title = get_the_title( (int) get_option( 'page_for_posts' ) );
+		if ( ! $title ) {
+			$title = __( 'Articles', 'collision-academy' );
+		}
+		$url = collision_academy_get_articles_url();
+
+	} elseif ( is_singular() && isset( $post ) ) {
 		// Single post or page.
 		$title       = get_the_title( $post->ID );
 		$description = collision_academy_get_description( $post );
@@ -43,31 +64,43 @@ function collision_academy_meta_tags() {
 		$url         = get_permalink( $post->ID );
 		$type        = is_singular( 'post' ) ? 'article' : 'website';
 
-	} elseif ( is_home() || is_front_page() ) {
-		// Blog index or front page.
-		$title       = get_bloginfo( 'name' );
-		$description = get_bloginfo( 'description' );
-		$image       = collision_academy_get_default_og_image();
-		$url         = home_url( '/' );
-		$type        = 'website';
+	} elseif ( is_category() || is_tag() || is_tax() ) {
+		$term = get_queried_object();
+
+		if ( $term instanceof WP_Term ) {
+			$title       = single_term_title( '', false );
+			$description = wp_strip_all_tags( term_description( $term, $term->taxonomy ) );
+			$url         = collision_academy_get_canonical_url();
+		}
 
 	} elseif ( is_archive() ) {
 		// Category, tag, or other archive.
 		$title       = get_the_archive_title();
-		$description = get_the_archive_description();
+		$description = wp_strip_all_tags( get_the_archive_description() );
 		if ( ! $description ) {
 			$description = get_bloginfo( 'description' );
 		}
 		$image = collision_academy_get_default_og_image();
-		$url   = get_the_permalink();
+		$url   = collision_academy_get_canonical_url();
 		$type  = 'website';
+
+	} elseif ( is_search() ) {
+		/* translators: %s: search query. */
+		$title       = sprintf( __( 'Search results for "%s"', 'collision-academy' ), get_search_query() );
+		$description = __( 'Search results from Collision Academy.', 'collision-academy' );
+		$url         = collision_academy_get_canonical_url();
+
+	} elseif ( is_404() ) {
+		$title       = __( 'Page not found', 'collision-academy' );
+		$description = __( 'The requested page could not be found on Collision Academy.', 'collision-academy' );
+		$url         = '';
 
 	} else {
 		// Fallback for search results, 404, etc.
 		$title       = get_bloginfo( 'name' );
 		$description = get_bloginfo( 'description' );
 		$image       = collision_academy_get_default_og_image();
-		$url         = home_url( '/' );
+		$url         = collision_academy_get_canonical_url();
 		$type        = 'website';
 	}
 
@@ -104,9 +137,15 @@ function collision_academy_meta_tags() {
 	<meta name="description" content="<?php echo $description; ?>" />
 	<?php endif; ?>
 
+	<?php if ( $url ) : ?>
 	<!-- Canonical URL (prevents duplicate content penalties) -->
 	<link rel="canonical" href="<?php echo $url; ?>" />
+	<?php endif; ?>
 	<?php
+
+	if ( is_search() || is_404() ) {
+		echo '<meta name="robots" content="noindex,follow" />' . "\n";
+	}
 
 	// For single posts, also add article-specific Open Graph tags.
 	if ( is_singular( 'post' ) && isset( $post ) ) {
@@ -117,6 +156,76 @@ function collision_academy_meta_tags() {
 	}
 }
 add_action( 'wp_head', 'collision_academy_meta_tags', 5 );
+
+/**
+ * collision_academy_get_canonical_url()
+ *
+ * Returns the best canonical URL for the current request.
+ *
+ * @return string Canonical URL, or an empty string for pages such as 404s.
+ */
+function collision_academy_get_canonical_url() {
+	global $wp;
+
+	if ( is_404() ) {
+		return '';
+	}
+
+	$paged = max( 1, (int) get_query_var( 'paged' ), (int) get_query_var( 'page' ) );
+
+	if ( $paged > 1 && ! is_singular() ) {
+		return get_pagenum_link( $paged );
+	}
+
+	if ( is_front_page() ) {
+		return home_url( '/' );
+	}
+
+	if ( is_home() ) {
+		return collision_academy_get_articles_url();
+	}
+
+	if ( is_singular() ) {
+		return get_permalink();
+	}
+
+	if ( is_category() || is_tag() || is_tax() ) {
+		$term = get_queried_object();
+		if ( $term instanceof WP_Term ) {
+			$link = get_term_link( $term );
+			if ( ! is_wp_error( $link ) ) {
+				return $link;
+			}
+		}
+	}
+
+	if ( is_post_type_archive() ) {
+		$post_type = get_query_var( 'post_type' );
+
+		if ( is_array( $post_type ) ) {
+			$post_type = reset( $post_type );
+		}
+
+		$link = get_post_type_archive_link( $post_type );
+		if ( $link ) {
+			return $link;
+		}
+	}
+
+	if ( is_author() ) {
+		return get_author_posts_url( get_queried_object_id() );
+	}
+
+	if ( is_search() ) {
+		return get_search_link( get_search_query() );
+	}
+
+	if ( isset( $wp->request ) && $wp->request ) {
+		return home_url( user_trailingslashit( $wp->request ) );
+	}
+
+	return home_url( '/' );
+}
 
 // =============================================================================
 // HELPER FUNCTIONS FOR SEO
@@ -183,9 +292,11 @@ function collision_academy_get_default_og_image() {
 	}
 
 	// Fall back to the bundled default image in the theme's assets folder.
-	$default = get_template_directory_uri() . '/assets/images/og-default.jpg';
+	if ( file_exists( get_template_directory() . '/assets/images/og-default.svg' ) ) {
+		return get_template_directory_uri() . '/assets/images/og-default.svg';
+	}
 
-	return $default;
+	return '';
 }
 
 // =============================================================================

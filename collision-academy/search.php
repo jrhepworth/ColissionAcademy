@@ -50,7 +50,7 @@ get_header();
 					<?php
 					printf(
 						/* translators: %s = the search query */
-						esc_html__( 'Nothing found for &ldquo;%s&rdquo;', 'collision-academy' ),
+						esc_html__( 'Nothing found for "%s"', 'collision-academy' ),
 						esc_html( get_search_query() )
 					);
 					?>

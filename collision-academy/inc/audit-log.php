@@ -106,7 +106,7 @@ function collision_academy_audit_admin_page() {
 		isset( $_POST['ca_purge_audit'] ) &&
 		check_admin_referer( 'ca_purge_audit_action', 'ca_purge_audit_nonce' )
 	) {
-		$wpdb->query( "TRUNCATE TABLE {$table}" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$wpdb->query( "DELETE FROM {$table}" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		echo '<div class="notice notice-success"><p>' . esc_html__( 'Audit log has been purged.', 'collision-academy' ) . '</p></div>';
 	}
 
@@ -160,7 +160,13 @@ function collision_academy_audit_admin_page() {
 						<tr>
 							<td><?php echo esc_html( $record->created_at ); ?></td>
 							<td><code><?php echo esc_html( $record->event_type ); ?></code></td>
-							<td><code title="<?php esc_attr_e( 'SHA-256 hash — not a raw IP address', 'collision-academy' ); ?>"><?php echo esc_html( substr( $record->hashed_ip, 0, 16 ) . '…' ); ?></code></td>
+							<td>
+								<?php if ( $record->hashed_ip ) : ?>
+									<code title="<?php esc_attr_e( 'SHA-256 hash — not a raw IP address', 'collision-academy' ); ?>"><?php echo esc_html( substr( $record->hashed_ip, 0, 16 ) . '…' ); ?></code>
+								<?php else : ?>
+									<?php esc_html_e( 'Not recorded', 'collision-academy' ); ?>
+								<?php endif; ?>
+							</td>
 							<td><?php echo esc_html( $record->detail ); ?></td>
 						</tr>
 					<?php endforeach; ?>
