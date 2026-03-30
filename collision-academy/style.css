@@ -1,0 +1,22 @@
+/*
+Theme Name:  Collision Academy
+Theme URI:   https://www.collisionacademy.co.uk
+Author:      Collision Academy
+Author URI:  https://www.collisionacademy.co.uk
+Description: A professional publication theme for forensic collision investigation and vehicle technology. Clean, authoritative, and built for specialist audiences.
+Version:     1.0.0
+Requires at least: 6.4
+Tested up to: 6.7
+Requires PHP: 8.1
+License:     GNU General Public License v2 or later
+License URI: https://www.gnu.org/licenses/gpl-2.0.html
+Text Domain: collision-academy
+Tags:        custom-menu, custom-logo, featured-images, threaded-comments, responsive-layout
+*/
+
+/*
+ * This file intentionally contains only the WordPress theme header comment above.
+ * All actual styles live in assets/css/main.css, which is enqueued properly
+ * via functions.php using wp_enqueue_style(). This approach ensures correct
+ * cache-busting via the theme version number and follows WordPress best practice.
+ */
