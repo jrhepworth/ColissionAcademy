@@ -26,7 +26,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Theme version — bump this when you update the theme to bust CSS/JS caches.
  */
-define( 'COLLISION_ACADEMY_VERSION', '1.0.0' );
+define( 'COLLISION_ACADEMY_VERSION', '1.1.0' );
 
 /**
  * IP Hashing Salt — used to anonymise IP addresses before storage (GDPR).
@@ -79,6 +79,7 @@ require_once get_template_directory() . '/inc/seo.php';          // Open Graph, 
  * navigation menu locations.
  */
 function collision_academy_setup() {
+	global $content_width;
 
 	/*
 	 * Make this theme's strings translatable. The text domain must match
@@ -178,12 +179,12 @@ function collision_academy_scripts() {
 	 * Enqueue Google Fonts. We request only the weights we actually use to
 	 * minimise the download size. The 'preconnect' links are in header.php.
 	 *
-	 * Inter: headings, UI, navigation (weights 400, 500, 600, 700)
+	 * IBM Plex Sans: headings, UI, navigation (weights 400, 500, 600, 700)
 	 * Source Serif 4: article body text (400, 600, italic 400)
 	 */
 	wp_enqueue_style(
 		'collision-academy-fonts',
-		'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap',
+		'https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap',
 		array(),
 		null // null = no version, prevents WordPress appending ?ver= to Google's URL
 	);
@@ -229,8 +230,14 @@ function collision_academy_scripts() {
 		'contactNonce'    => wp_create_nonce( 'ca_contact_action' ),
 		'i18n'            => array(
 			'sending'     => esc_html__( 'Sending…', 'collision-academy' ),
+			'subscribing' => esc_html__( 'Subscribing…', 'collision-academy' ),
 			'copied'      => esc_html__( 'Copied!', 'collision-academy' ),
 			'copyLink'    => esc_html__( 'Copy link', 'collision-academy' ),
+			'openSearch'  => esc_html__( 'Open search', 'collision-academy' ),
+			'closeSearch' => esc_html__( 'Close search', 'collision-academy' ),
+			'openMenu'    => esc_html__( 'Open navigation menu', 'collision-academy' ),
+			'closeMenu'   => esc_html__( 'Close navigation menu', 'collision-academy' ),
+			'error'       => esc_html__( 'Something went wrong. Please try again.', 'collision-academy' ),
 		),
 	) );
 
@@ -467,7 +474,7 @@ add_filter( 'excerpt_length', 'collision_academy_excerpt_length' );
  * @return string Our replacement.
  */
 function collision_academy_excerpt_more( $more ) {
-	return '&hellip;';
+	return '...';
 }
 add_filter( 'excerpt_more', 'collision_academy_excerpt_more' );
 

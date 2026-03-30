@@ -142,7 +142,7 @@ function collision_academy_cpt_coming_soon_redirect() {
 		// Load the full theme header/footer but show a coming soon message.
 		get_header();
 		?>
-		<main id="ca-main" class="ca-coming-soon-page">
+		<section class="ca-coming-soon-page">
 			<div class="ca-container">
 				<div class="ca-coming-soon">
 					<span class="ca-coming-soon__eyebrow"><?php esc_html_e( 'Collision Academy', 'collision-academy' ); ?></span>
@@ -155,7 +155,7 @@ function collision_academy_cpt_coming_soon_redirect() {
 					</a>
 				</div>
 			</div>
-		</main>
+		</section>
 		<?php
 		get_footer();
 		exit; // Stop WordPress from loading any further template output.

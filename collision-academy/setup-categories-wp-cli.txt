@@ -1,0 +1,9 @@
+Collision Academy launch categories
+Run these commands from the root of your WordPress installation if WP-CLI is available.
+
+wp term create category "Vehicle Dynamics" --slug=vehicle-dynamics --description="Articles on handling, speed, braking, yaw, rollover, and dynamic vehicle behaviour."
+wp term create category "Crash Reconstruction" --slug=crash-reconstruction --description="Technical reconstruction, impact analysis, timelines, scene interpretation, and collision causation."
+wp term create category "Evidence & Documentation" --slug=evidence-documentation --description="Scene recording, photography, measurements, exhibits, digital evidence, and reporting standards."
+wp term create category "Legal & Expert Witness" --slug=legal-expert-witness --description="Civil and criminal procedure, expert duties, disclosure, and courtroom practice."
+wp term create category "Vehicle Technology" --slug=vehicle-technology --description="ADAS, EDR systems, EVs, telematics, and emerging vehicle systems relevant to forensic work."
+wp term create category "Site News" --slug=site-news --description="Announcements, publication updates, editorial notes, and future training news."

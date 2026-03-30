@@ -16,7 +16,7 @@
  */
 
 // Prevent direct access and direct loading without a post context.
-if ( ! defined( 'ABSPATH' ) || ! post_password_required() === false ) {
+if ( ! defined( 'ABSPATH' ) || post_password_required() ) {
 	return;
 }
 ?>
@@ -30,7 +30,7 @@ if ( ! defined( 'ABSPATH' ) || ! post_password_required() === false ) {
 			$comment_count = get_comments_number();
 			printf(
 				/* translators: 1: Number of comments, 2: Post title */
-				esc_html( _n( '%1$s response to &ldquo;%2$s&rdquo;', '%1$s responses to &ldquo;%2$s&rdquo;', $comment_count, 'collision-academy' ) ),
+				esc_html( _n( '%1$s response to "%2$s"', '%1$s responses to "%2$s"', $comment_count, 'collision-academy' ) ),
 				number_format_i18n( $comment_count ),
 				'<span>' . esc_html( get_the_title() ) . '</span>'
 			);
@@ -51,8 +51,8 @@ if ( ! defined( 'ABSPATH' ) || ! post_password_required() === false ) {
 		<?php
 		// Pagination for comment pages (if enabled in Settings > Discussion).
 		the_comments_navigation( array(
-			'prev_text' => esc_html__( '&larr; Older comments', 'collision-academy' ),
-			'next_text' => esc_html__( 'Newer comments &rarr;', 'collision-academy' ),
+			'prev_text' => '<span aria-hidden="true">&larr;</span> ' . esc_html__( 'Older comments', 'collision-academy' ),
+			'next_text' => esc_html__( 'Newer comments', 'collision-academy' ) . ' <span aria-hidden="true">&rarr;</span>',
 		) );
 		?>
 
@@ -72,6 +72,8 @@ if ( ! defined( 'ABSPATH' ) || ! post_password_required() === false ) {
 	 * comment_form() outputs the comment submission form.
 	 * We customise the default fields for style consistency.
 	 */
+	$commenter = wp_get_current_commenter();
+
 	comment_form( array(
 		'title_reply'          => esc_html__( 'Leave a comment', 'collision-academy' ),
 		'title_reply_to'       => esc_html__( 'Reply to %s', 'collision-academy' ),
@@ -138,7 +140,7 @@ function collision_academy_comment( $comment, $args, $depth ) {
 	}
 	?>
 	<li id="comment-<?php comment_ID(); ?>" <?php comment_class( $classes, $comment ); ?>>
-		<div class="ca-comment__inner">
+		<div id="div-comment-<?php comment_ID(); ?>" class="ca-comment__inner">
 
 			<!-- Avatar -->
 			<div class="ca-comment__avatar">
@@ -162,7 +164,7 @@ function collision_academy_comment( $comment, $args, $depth ) {
 						printf(
 							esc_html__( '%s at %s', 'collision-academy' ),
 							get_comment_date( 'j F Y' ),
-							get_comment_date( 'H:i' )
+							get_comment_time( 'H:i' )
 						);
 						?>
 					</time>

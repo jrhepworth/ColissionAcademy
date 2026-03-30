@@ -16,7 +16,7 @@ get_header();
 
 		<header class="ca-archive-header">
 			<span class="ca-eyebrow"><?php esc_html_e( 'Tag', 'collision-academy' ); ?></span>
-			<?php single_tag_title( '<h1 class="ca-archive-header__title">', '</h1>' ); ?>
+			<h1 class="ca-archive-header__title"><?php echo esc_html( single_tag_title( '', false ) ); ?></h1>
 			<?php
 			$tag_description = tag_description();
 			if ( $tag_description ) :
@@ -33,7 +33,10 @@ get_header();
 		<?php else : ?>
 			<div class="ca-no-results">
 				<p><?php esc_html_e( 'No articles found with this tag.', 'collision-academy' ); ?></p>
-				<a href="<?php echo esc_url( home_url( '/' ) ); ?>" class="ca-btn ca-btn--secondary"><?php esc_html_e( '&larr; Back to all articles', 'collision-academy' ); ?></a>
+				<a href="<?php echo esc_url( collision_academy_get_articles_url() ); ?>" class="ca-btn ca-btn--secondary">
+					<span aria-hidden="true">&larr;</span>
+					<?php esc_html_e( 'Back to all articles', 'collision-academy' ); ?>
+				</a>
 			</div>
 		<?php endif; ?>
 

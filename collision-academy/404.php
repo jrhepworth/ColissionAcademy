@@ -39,11 +39,12 @@ get_header();
 			<!-- Navigation Options -->
 			<nav class="ca-404__nav" aria-label="<?php esc_attr_e( 'Helpful links', 'collision-academy' ); ?>">
 				<ul class="ca-404__nav-list">
-					<li>
-						<a href="<?php echo esc_url( home_url( '/' ) ); ?>" class="ca-btn ca-btn--secondary">
-							<?php esc_html_e( '&larr; Return to Home', 'collision-academy' ); ?>
-						</a>
-					</li>
+						<li>
+							<a href="<?php echo esc_url( home_url( '/' ) ); ?>" class="ca-btn ca-btn--secondary">
+								<span aria-hidden="true">&larr;</span>
+								<?php esc_html_e( 'Return to Home', 'collision-academy' ); ?>
+							</a>
+						</li>
 					<?php
 					// Show links to categories with posts.
 					$cats = get_categories( array( 'hide_empty' => true, 'number' => 4 ) );

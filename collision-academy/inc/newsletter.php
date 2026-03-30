@@ -286,6 +286,7 @@ function collision_academy_newsletter_signup() {
 	);
 
 	if ( ! $inserted ) {
+		collision_academy_log_event( 'newsletter_fail', $ip_hash, 'database insert failed' );
 		wp_send_json_error( array(
 			'message' => esc_html__( 'Something went wrong. Please try again.', 'collision-academy' ),
 		) );
@@ -351,7 +352,15 @@ function collision_academy_contact_submit() {
 		'other'        => __( 'Other', 'collision-academy' ),
 	);
 
-	$subject_label = isset( $valid_subjects[ $subject_raw ] ) ? $valid_subjects[ $subject_raw ] : $valid_subjects['general'];
+	if ( empty( $subject_raw ) || ! isset( $valid_subjects[ $subject_raw ] ) ) {
+		collision_academy_log_event( 'contact_fail', $ip_hash, 'invalid subject selection' );
+		wp_send_json_error( array(
+			'message' => esc_html__( 'Please select a subject for your enquiry.', 'collision-academy' ),
+			'field'   => 'subject',
+		) );
+	}
+
+	$subject_label = $valid_subjects[ $subject_raw ];
 
 	// Validate required fields.
 	if ( empty( $name ) ) {
@@ -364,7 +373,7 @@ function collision_academy_contact_submit() {
 		wp_send_json_error( array( 'message' => esc_html__( 'Please enter a valid email address.', 'collision-academy' ), 'field' => 'email' ) );
 	}
 
-	if ( empty( $message ) || strlen( $message ) < 10 ) {
+	if ( empty( $message ) || strlen( trim( $message ) ) < 10 ) {
 		collision_academy_log_event( 'contact_fail', $ip_hash, 'message too short' );
 		wp_send_json_error( array( 'message' => esc_html__( 'Please enter a message (at least 10 characters).', 'collision-academy' ), 'field' => 'message' ) );
 	}

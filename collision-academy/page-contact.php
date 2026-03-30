@@ -138,6 +138,7 @@ get_header();
 						<option value="advertising"><?php esc_html_e( 'Advertising / Partnership', 'collision-academy' ); ?></option>
 						<option value="other"><?php esc_html_e( 'Other', 'collision-academy' ); ?></option>
 					</select>
+					<span class="ca-form-field__error" id="ca-contact-subject-error" role="alert"></span>
 				</div>
 
 				<!-- Message -->

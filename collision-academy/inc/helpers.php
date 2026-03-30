@@ -131,6 +131,28 @@ function collision_academy_increment_rate_limit( $form_key, $window = HOUR_IN_SE
 // =============================================================================
 
 /**
+ * collision_academy_get_articles_url()
+ *
+ * Returns the URL of the site-wide articles listing page.
+ * If a dedicated Posts page is assigned in Settings > Reading, we use it.
+ * Otherwise we fall back to the site's home URL.
+ *
+ * @return string Articles index URL.
+ */
+function collision_academy_get_articles_url() {
+	$page_for_posts = (int) get_option( 'page_for_posts' );
+
+	if ( $page_for_posts ) {
+		$url = get_permalink( $page_for_posts );
+		if ( $url ) {
+			return $url;
+		}
+	}
+
+	return home_url( '/' );
+}
+
+/**
  * collision_academy_get_category_list()
  *
  * Returns a formatted list of category links for a post.
@@ -232,8 +254,8 @@ function collision_academy_pagination( $query = null ) {
 		'format'    => '?paged=%#%',
 		'current'   => $current_page,
 		'total'     => $total_pages,
-		'prev_text' => '&larr; ' . esc_html__( 'Previous', 'collision-academy' ),
-		'next_text' => esc_html__( 'Next', 'collision-academy' ) . ' &rarr;',
+		'prev_text' => '<span aria-hidden="true">&larr;</span> ' . esc_html__( 'Previous', 'collision-academy' ),
+		'next_text' => esc_html__( 'Next', 'collision-academy' ) . ' <span aria-hidden="true">&rarr;</span>',
 		'type'      => 'array', // Returns an array so we can wrap each link ourselves.
 	) );
 
