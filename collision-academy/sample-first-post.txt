@@ -1,0 +1,79 @@
+TITLE
+The Limits Of Pre-Impact Speed Estimates From Dashcam Footage Alone
+
+SLUG
+limits-of-pre-impact-speed-estimates-from-dashcam-footage-alone
+
+EXCERPT
+Dashcam footage can be helpful, but isolated frame analysis often creates more apparent certainty than the underlying evidence supports. This sample article is designed to exercise the theme layout and demonstrate an evidence-led writing style.
+
+SUGGESTED CATEGORY
+Crash Reconstruction
+
+SUGGESTED TAGS
+Dashcam, Video Evidence, Speed Estimation, Methodology
+
+FEATURED IMAGE IDEA
+Use a clean annotated still from a road scene, a camera calibration diagram, or a measured scene sketch. Avoid generic crash stock photography.
+
+ARTICLE BODY
+
+Introduction
+
+Dashcam footage is now a common evidential source in both civil and criminal road traffic investigations. It can be highly persuasive to lay audiences because it appears immediate, objective, and visually complete. In practice, however, footage alone rarely provides a sufficient basis for a confident pre-impact speed estimate unless the recording conditions, camera geometry, timing precision, and scene references are properly understood.
+
+This sample article demonstrates the intended editorial tone of Collision Academy: analytical, neutral, and explicit about limitations.
+
+Methodology
+
+When video footage is assessed for speed estimation, the investigator should document at least the following:
+
+- frame rate and whether it is constant or variable
+- camera position, lens distortion, and stabilisation behaviour
+- known scene dimensions or control points
+- whether compression artefacts affect object edges
+- whether vehicle motion is planar or includes pitch, roll, or yaw that affects scaling
+
+Blockquote example:
+
+"A measurement taken from imagery is not a measurement of reality until the imaging process itself has been accounted for."
+
+Findings
+
+Where there are no reliable scale references visible in the same plane as the subject vehicle, any speed estimate derived from apparent movement should be treated with caution. Perspective effects can cause large apparent changes in displacement depending on camera placement and focal characteristics.
+
+Example table for testing theme styling:
+
+<table>
+  <thead>
+    <tr>
+      <th>Question</th>
+      <th>Why It Matters</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Is the frame rate verified?</td>
+      <td>Incorrect timing directly distorts any speed calculation.</td>
+    </tr>
+    <tr>
+      <td>Are there measured reference points?</td>
+      <td>Without scale, displacement estimates may be unreliable.</td>
+    </tr>
+    <tr>
+      <td>Is lens distortion corrected?</td>
+      <td>Wide-angle footage can warp distances, especially near frame edges.</td>
+    </tr>
+  </tbody>
+</table>
+
+Discussion
+
+Dashcam evidence is often most valuable when it is integrated with scene measurements, vehicle damage interpretation, event data recorder outputs, witness evidence, and road environment analysis. Used in isolation, it can still inform lines of enquiry, but it should not be allowed to imply a level of precision that the underlying data cannot sustain.
+
+Conclusion
+
+The key professional question is not whether dashcam footage is useful. It plainly is. The question is what level of confidence is justified by the footage in the context of the wider evidential record. That distinction is where good forensic practice separates observation from inference.
+
+AUTHOR BIO SUGGESTION
+Add a short author bio in `Users > Profile > Biographical Info` so the author box appears at the end of the article.
