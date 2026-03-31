@@ -90,7 +90,8 @@ function collision_academy_subscribers_page() {
 		);
 
 		// Fetch all subscribers.
-		$all_subscribers = $wpdb->get_results( "SELECT name, email, subscribed_at FROM {$table} ORDER BY subscribed_at DESC", ARRAY_A ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery -- $table is $wpdb->prefix . 'ca_subscribers'; no user input in query.
+		$all_subscribers = $wpdb->get_results( "SELECT name, email, subscribed_at FROM {$table} ORDER BY subscribed_at DESC", ARRAY_A );
 
 		// Output CSV headers.
 		header( 'Content-Type: text/csv; charset=utf-8' );
@@ -114,8 +115,9 @@ function collision_academy_subscribers_page() {
 	$current_page = max( 1, isset( $_GET['paged'] ) ? absint( $_GET['paged'] ) : 1 ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 	$offset       = ( $current_page - 1 ) * $per_page;
 
-	$total       = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$table}" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-	$subscribers = $wpdb->get_results( // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+	// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery -- $table is $wpdb->prefix . 'ca_subscribers'; no user input in query.
+	$total       = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$table}" );
+	$subscribers = $wpdb->get_results( // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery -- $table is trusted; user input ($per_page, $offset) is parameterised via prepare().
 		$wpdb->prepare(
 			"SELECT * FROM {$table} ORDER BY subscribed_at DESC LIMIT %d OFFSET %d",
 			$per_page,
@@ -223,17 +225,15 @@ function collision_academy_newsletter_signup() {
 		wp_send_json_success( array( 'message' => esc_html__( "You're subscribed! Thank you.", 'collision-academy' ) ) );
 	}
 
-	// Step 3: Rate limit check.
-	if ( collision_academy_check_rate_limit( 'nl' ) ) {
+	// Step 3: Rate limit check — check and increment atomically in one call.
+	// Counting before validation means failed validation attempts also consume quota,
+	// preventing brute-force enumeration via repeated probing.
+	if ( collision_academy_check_and_increment_rate_limit( 'nl' ) ) {
 		collision_academy_log_event( 'newsletter_fail', $ip_hash, 'rate limit exceeded' );
 		wp_send_json_error( array(
 			'message' => esc_html__( 'Too many attempts. Please wait an hour and try again.', 'collision-academy' ),
 		) );
 	}
-
-	// Increment the counter BEFORE validation so failed validation attempts also count.
-	// This prevents brute-force enumeration via repeated validation probing.
-	collision_academy_increment_rate_limit( 'nl' );
 
 	// Step 4: Sanitize inputs.
 	$name  = sanitize_text_field( wp_unslash( isset( $_POST['ca_name'] ) ? $_POST['ca_name'] : '' ) );
@@ -286,7 +286,8 @@ function collision_academy_newsletter_signup() {
 	);
 
 	if ( ! $inserted ) {
-		collision_academy_log_event( 'newsletter_fail', $ip_hash, 'database insert failed' );
+		// Include $wpdb->last_error in the log so failures are diagnosable without enabling debug mode.
+		collision_academy_log_event( 'newsletter_fail', $ip_hash, 'database insert failed: ' . $wpdb->last_error );
 		wp_send_json_error( array(
 			'message' => esc_html__( 'Something went wrong. Please try again.', 'collision-academy' ),
 		) );
@@ -326,14 +327,12 @@ function collision_academy_contact_submit() {
 	}
 
 	// Rate limit check (separate key 'cf' for contact form, independent from newsletter).
-	if ( collision_academy_check_rate_limit( 'cf' ) ) {
+	if ( collision_academy_check_and_increment_rate_limit( 'cf' ) ) {
 		collision_academy_log_event( 'contact_fail', $ip_hash, 'rate limit exceeded' );
 		wp_send_json_error( array(
 			'message' => esc_html__( 'Too many attempts. Please wait an hour and try again.', 'collision-academy' ),
 		) );
 	}
-
-	collision_academy_increment_rate_limit( 'cf' );
 
 	// Sanitize all inputs.
 	$name         = sanitize_text_field( wp_unslash( isset( $_POST['ca_name'] ) ? $_POST['ca_name'] : '' ) );
@@ -379,7 +378,16 @@ function collision_academy_contact_submit() {
 	}
 
 	// Build the email.
-	$to          = get_option( 'admin_email' );
+	$to = get_option( 'admin_email' );
+
+	// Validate that the admin email is configured and well-formed before attempting to send.
+	// A blank or malformed admin_email causes wp_mail() to fail silently.
+	if ( ! $to || ! is_email( $to ) ) {
+		collision_academy_log_event( 'contact_fail', $ip_hash, 'admin_email not configured or invalid' );
+		wp_send_json_error( array(
+			'message' => esc_html__( 'Your message could not be sent due to a server configuration issue. Please try again later.', 'collision-academy' ),
+		) );
+	}
 	$mail_subject = sprintf(
 		/* translators: 1: Subject label, 2: Sender name */
 		__( '[Collision Academy] %1$s from %2$s', 'collision-academy' ),
@@ -396,9 +404,14 @@ function collision_academy_contact_submit() {
 		$message
 	);
 
+	// Strip CR/LF from the display name to prevent email header injection.
+	// sanitize_text_field() strips tags and extra whitespace but does not
+	// guarantee removal of literal CR/LF bytes, so we strip them explicitly.
+	$safe_name = str_replace( array( "\r", "\n" ), '', $name );
+
 	$headers = array(
 		'Content-Type: text/plain; charset=UTF-8',
-		'Reply-To: ' . $name . ' <' . $email . '>',
+		'Reply-To: ' . $safe_name . ' <' . $email . '>',
 	);
 
 	$sent = wp_mail( $to, $mail_subject, $mail_body, $headers );

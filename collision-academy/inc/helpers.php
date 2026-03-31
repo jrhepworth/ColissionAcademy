@@ -82,48 +82,37 @@ function collision_academy_hash_ip() {
 // =============================================================================
 
 /**
- * collision_academy_check_rate_limit()
+ * collision_academy_check_and_increment_rate_limit()
  *
- * Checks whether the current IP has exceeded the rate limit for a given form.
- * Returns true if the limit has been exceeded (i.e. the request should be blocked).
+ * Checks the rate limit for the current IP and form, then immediately
+ * increments the counter — all in one call. Combining check and increment
+ * minimises the TOCTOU (Time-of-Check / Time-of-Use) window that existed
+ * when these were two separate functions.
  *
- * Rate limits are stored as WordPress transients, which automatically expire.
- * No extra database table is needed.
+ * Returns true if the request should be blocked (limit already reached
+ * BEFORE this attempt), false if the request should be allowed.
+ *
+ * The counter is stored as a WordPress transient and expires automatically.
+ * The expiry is reset on each attempt (simple fixed-window, not sliding).
  *
  * @param string $form_key Short identifier for the form, e.g. 'nl' or 'cf'.
- * @param int    $limit    Maximum allowed attempts. Default 3.
- * @param int    $window   Time window in seconds. Default 3600 (1 hour).
- * @return bool True if limit exceeded, false if under limit.
+ * @param int    $limit    Maximum allowed attempts before blocking. Default 3.
+ * @param int    $window   Expiry window in seconds. Default 3600 (1 hour).
+ * @return bool True if limit exceeded (block the request), false if allowed.
  */
-function collision_academy_check_rate_limit( $form_key, $limit = 3, $window = HOUR_IN_SECONDS ) {
+function collision_academy_check_and_increment_rate_limit( $form_key, $limit = 3, $window = HOUR_IN_SECONDS ) {
 	$ip_hash   = collision_academy_hash_ip();
 	$trans_key = 'ca_' . $form_key . '_ratelimit_' . $ip_hash;
 
-	// get_transient returns false when the key doesn't exist yet.
+	// Read the current attempt count (0 if the transient doesn't exist yet).
 	$attempts = (int) get_transient( $trans_key );
 
-	return $attempts >= $limit;
-}
-
-/**
- * collision_academy_increment_rate_limit()
- *
- * Increments the attempt counter for the current IP and form.
- * If no transient exists yet, creates one with a value of 1.
- *
- * @param string $form_key Short identifier for the form, e.g. 'nl' or 'cf'.
- * @param int    $window   Time window in seconds. Default 3600 (1 hour).
- */
-function collision_academy_increment_rate_limit( $form_key, $window = HOUR_IN_SECONDS ) {
-	$ip_hash   = collision_academy_hash_ip();
-	$trans_key = 'ca_' . $form_key . '_ratelimit_' . $ip_hash;
-
-	$attempts = (int) get_transient( $trans_key );
-
-	// set_transient overwrites the existing value and resets the expiry timer.
-	// We set the full window each time — this means the window resets on each
-	// attempt, which is more aggressive than a sliding window but simpler.
+	// Increment immediately — before returning — so this attempt is always
+	// counted regardless of whether we allow or block the request.
 	set_transient( $trans_key, $attempts + 1, $window );
+
+	// Block if the count BEFORE this attempt was already at the limit.
+	return $attempts >= $limit;
 }
 
 // =============================================================================

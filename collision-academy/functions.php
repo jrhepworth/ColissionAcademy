@@ -343,6 +343,26 @@ function collision_academy_schedule_cron() {
 add_action( 'after_switch_theme', 'collision_academy_schedule_cron' );
 
 /**
+ * collision_academy_verify_cron()
+ *
+ * Re-registers our scheduled tasks on every WordPress init in case they were
+ * accidentally cleared (e.g. after a plugin wipes all transients/cron events,
+ * or if WP-Cron was disabled when the theme was first activated).
+ *
+ * wp_next_scheduled() is backed by a transient cache so this check is cheap
+ * and safe to run on every request.
+ */
+function collision_academy_verify_cron() {
+	if ( ! wp_next_scheduled( 'collision_academy_purge_ip_hashes' ) ) {
+		wp_schedule_event( time(), 'daily', 'collision_academy_purge_ip_hashes' );
+	}
+	if ( ! wp_next_scheduled( 'collision_academy_purge_audit_log' ) ) {
+		wp_schedule_event( time(), 'daily', 'collision_academy_purge_audit_log' );
+	}
+}
+add_action( 'init', 'collision_academy_verify_cron' );
+
+/**
  * collision_academy_unschedule_cron()
  *
  * Removes our scheduled tasks when the theme is deactivated/switched.

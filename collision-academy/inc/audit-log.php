@@ -106,7 +106,10 @@ function collision_academy_audit_admin_page() {
 		isset( $_POST['ca_purge_audit'] ) &&
 		check_admin_referer( 'ca_purge_audit_action', 'ca_purge_audit_nonce' )
 	) {
-		$wpdb->query( "DELETE FROM {$table}" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		// Log the purge before wiping records so there is a record of who did it.
+		collision_academy_log_event( 'audit_purged', '', 'Manual purge by user ID ' . get_current_user_id() );
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery -- $table is $wpdb->prefix . 'ca_audit_log'; no user input in query.
+		$wpdb->query( "DELETE FROM {$table}" );
 		echo '<div class="notice notice-success"><p>' . esc_html__( 'Audit log has been purged.', 'collision-academy' ) . '</p></div>';
 	}
 
@@ -115,8 +118,9 @@ function collision_academy_audit_admin_page() {
 	$current_page = max( 1, isset( $_GET['paged'] ) ? absint( $_GET['paged'] ) : 1 ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 	$offset       = ( $current_page - 1 ) * $per_page;
 
-	$total   = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$table}" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-	$records = $wpdb->get_results( // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+	// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery -- $table is $wpdb->prefix . 'ca_audit_log'; no user input in query.
+	$total   = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$table}" );
+	$records = $wpdb->get_results( // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery -- $table is trusted; $per_page/$offset parameterised via prepare().
 		$wpdb->prepare(
 			"SELECT * FROM {$table} ORDER BY created_at DESC LIMIT %d OFFSET %d",
 			$per_page,
