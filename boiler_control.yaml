@@ -1,0 +1,38 @@
+alias: Boiler Control
+description: ""
+triggers:
+  - entity_id:
+      - sensor.climate_panel_bb_temperature
+      - sensor.radiator_thermostat_89_temperature
+    trigger: state
+  - event: start
+    trigger: homeassistant
+variables:
+  panel_temp: "{{ states('sensor.climate_panel_bb_temperature') | float('nan') }}"
+  radiator_temp: "{{ states('sensor.radiator_thermostat_89_temperature') | float('nan') }}"
+  hysteresis: 0.3
+actions:
+  - condition: template
+    value_template: "{{ panel_temp == panel_temp and radiator_temp == radiator_temp }}"
+  - choose:
+      - conditions:
+          - condition: template
+            value_template: |
+              {{ panel_temp > (radiator_temp + hysteresis) }}
+        sequence:
+          - target:
+              entity_id: climate.radiator_thermostat_89
+            data:
+              hvac_mode: "off"
+            action: climate.set_hvac_mode
+      - conditions:
+          - condition: template
+            value_template: |
+              {{ panel_temp < (radiator_temp - hysteresis) }}
+        sequence:
+          - target:
+              entity_id: climate.radiator_thermostat_89
+            data:
+              hvac_mode: heat
+            action: climate.set_hvac_mode
+mode: single
